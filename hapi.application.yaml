@@ -4,3 +4,4 @@ hapi:
     server_address: https://hapi-fhir.wecare.localhost/fhir
     default_encoding: json
     # dao_config.server_id_mode: UUID
+    custom_content_path: /custom

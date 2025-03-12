@@ -17,6 +17,8 @@ services:
     configs:
       - source: hapi
         target: /app/config/application.yaml
+    volumes:
+      - ./custom:/custom
     depends_on:
       postgres:
         condition: service_healthy
