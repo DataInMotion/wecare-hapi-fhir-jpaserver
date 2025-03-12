@@ -18,7 +18,7 @@ services:
       - source: hapi
         target: /app/config/application.yaml
     volumes:
-      - ./custom:/custom
+      - ./custom-hapi-theme:/custom
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,6 +102,7 @@ services:
       timeout: 5s
     command:
       [
+        #  'start-dev',
         'start',
         '-Dauto-build',
         '--log-level=INFO,io.vertx.ext.web.impl.RouterImpl:TRACE',
@@ -148,6 +149,7 @@ services:
       - '${PWD}/certs/keycloak-key.pem:/etc/keycloak/certs/key.pem'
       - '${PWD}/certs:/opt/keycloak/conf/truststores'
       - '${PWD}:/import'
+      - '${PWD}/custom-keycloak-theme/:/opt/keycloak/themes/wecare'
     depends_on:
       postgres:
         condition: service_healthy
