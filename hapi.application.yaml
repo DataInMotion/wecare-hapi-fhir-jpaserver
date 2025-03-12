@@ -1,0 +1,6 @@
+hapi:
+  fhir:
+    # server_address: http://localhost:8080/fhir
+    server_address: https://hapi-fhir.wecare.localhost/fhir
+    default_encoding: json
+    # dao_config.server_id_mode: UUID
