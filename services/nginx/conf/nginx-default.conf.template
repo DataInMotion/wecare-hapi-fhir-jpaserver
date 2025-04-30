@@ -87,7 +87,16 @@ server {
         add_header Set-Cookie $auth_cookie_name_1;
     }
 
-    proxy_pass http://hapi-fhir:8080/;
+    proxy_set_header  Host               $host;
+    proxy_set_header  X-Real-IP          $remote_addr;
+    proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
+    proxy_set_header  X-Forwarded-Host   $host:443;
+    proxy_set_header  X-Forwarded-Server $host;
+    proxy_set_header  X-Forwarded-Port   443;
+    proxy_set_header  X-Forwarded-Proto  https;
+
+#    proxy_pass http://hapi-fhir:8080/;
+    proxy_pass http://hapi-fhir:80/;
   }
 
   location = /oauth2/sign_out {
@@ -132,18 +141,28 @@ server {
     proxy_set_header  X-Forwarded-Proto  $scheme;
   }
 
+  location / {
+    proxy_pass        https://keycloak.wecare.localhost:8443/;
+    proxy_set_header  Host               $host;
+    proxy_set_header  X-Real-IP          $remote_addr;
+    proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
+    proxy_set_header  X-Forwarded-Host   $host:443;
+    proxy_set_header  X-Forwarded-Server $host;
+    proxy_set_header  X-Forwarded-Port   443;
+    proxy_set_header  X-Forwarded-Proto  https;
+  }
 }
 
-  # location / {
-  #   proxy_set_header  Host               $host;
-  #   proxy_set_header  X-Real-IP          $remote_addr;
-  #   proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
-  #   proxy_set_header  X-Forwarded-Host   $host:443;
-  #   proxy_set_header  X-Forwarded-Server $host;
-  #   proxy_set_header  X-Forwarded-Port   443;
-  #   proxy_set_header  X-Forwarded-Proto  https;
-  #   proxy_pass        http://hapi-fhir:8080/;
-  # }
+#location / {
+#   proxy_set_header  Host               $host;
+#   proxy_set_header  X-Real-IP          $remote_addr;
+#   proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
+#   proxy_set_header  X-Forwarded-Host   $host:443;
+#   proxy_set_header  X-Forwarded-Server $host;
+#   proxy_set_header  X-Forwarded-Port   443;
+#   proxy_set_header  X-Forwarded-Proto  https;
+#   proxy_pass        http://hapi-fhir:8080/;
+#}
 
 # https://docs.nginx.com/nginx/admin-guide/security-controls/terminating-ssl-http/
 # https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication

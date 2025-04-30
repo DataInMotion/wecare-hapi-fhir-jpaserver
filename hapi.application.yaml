@@ -1,7 +1,16 @@
+server:
+  #  servlet:
+  #    context-path: /example/path
+  port: 80
 hapi:
   fhir:
     # server_address: http://localhost:8080/fhir
     server_address: https://hapi-fhir.wecare.localhost/fhir
+    server_address_strategy: header
     default_encoding: json
     # dao_config.server_id_mode: UUID
     custom_content_path: /custom
+    tester:
+      home:
+        server_address: http://hapi-fhir.wecare.localhost/fhir
+

@@ -1,16 +1,20 @@
 services:
   hapi-fhir:
     container_name: hapi-fhir
+    hostname: hapi-fhir.wecare.localhost
+    extra_hosts:
+      - "hapi-fhir.wecare.localhost:127.0.0.1"
     build:
       context: ./services/hapi-fhir
       dockerfile: Dockerfile
-    # restart: unless-stopped
+    restart: unless-stopped
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-hapi-fhir}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-secret}
       SPRING_DATASOURCE_DRIVERCLASSNAME: 'org.postgresql.Driver'
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: 'ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect'
+      HAPI_FHIR_CONFIG_PATH: /app/config
     env_file: ./.env
     expose:
       - 80:80
@@ -26,7 +30,9 @@ services:
       keycloak.wecare.localhost:
         condition: service_healthy
     networks:
-      - hapi_fhir_network
+      hapi_fhir_network:
+        aliases:
+          - hapi-fhir
 
   nginx:
     container_name: nginx
@@ -78,6 +84,8 @@ services:
       interval: 30s
       retries: 5
       timeout: 5s
+    ports:
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -101,22 +109,21 @@ services:
       retries: 5
       timeout: 5s
     command:
+      #[
+      #  #  'start-dev',
+      #  'start',
+      #  '-Dauto-build',
+      #  '--log-level=INFO,io.vertx.ext.web.impl.RouterImpl:TRACE',
+      #  '-Dkeycloak.migration.action=import',
+      #  '-Dkeycloak.migration.provider=singleFile',
+      #  '-Dkeycloak.migration.realmName=hapi-fhir-dev',
+      #  '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
+      #  '-Dkeycloak.migration.file=/import/development-realm.json'
+      #]
       [
-        #  'start-dev',
         'start',
-        '-Dauto-build',
         '--log-level=INFO,io.vertx.ext.web.impl.RouterImpl:TRACE',
-        '-Dkeycloak.migration.action=import',
-        '-Dkeycloak.migration.provider=singleFile',
-        '-Dkeycloak.migration.realmName=hapi-fhir-dev',
-        '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
-        '-Dkeycloak.migration.file=/import/development-realm.json'
       ]
-      #    command:
-      #      [
-      #        'start',
-      #        '--log-level=INFO,io.vertx.ext.web.impl.RouterImpl:TRACE',
-      #      ]
 
     environment:
 
@@ -227,7 +234,7 @@ services:
 
       # Upstreams configuration
       OAUTH2_PROXY_SSL_UPSTREAM_INSECURE_SKIP_VERIFY: true
-      OAUTH2_PROXY_UPSTREAMS: http://hapi-fhir:8080/
+      OAUTH2_PROXY_UPSTREAMS: http://hapi-fhir/
 
     env_file: ./.env
     ports:
