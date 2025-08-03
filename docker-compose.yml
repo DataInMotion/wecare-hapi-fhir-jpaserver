@@ -1,9 +1,9 @@
 services:
   hapi-fhir:
     container_name: hapi-fhir
-    hostname: hapi-fhir.wecare.localhost
+    hostname: fhir.mi-jn.de
     extra_hosts:
-      - "hapi-fhir.wecare.localhost:127.0.0.1"
+      - "fhir.mi-jn.de:127.0.0.1"
     build:
       context: ./services/hapi-fhir
       dockerfile: Dockerfile
@@ -27,7 +27,7 @@ services:
       postgres:
         condition: service_healthy
       # keycloak:
-      keycloak.wecare.localhost:
+      auth.mi-jn.de:
         condition: service_healthy
     networks:
       hapi_fhir_network:
@@ -96,12 +96,13 @@ services:
     networks:
       - hapi_fhir_network
 
-  keycloak.wecare.localhost:
-    container_name: keycloak.wecare.localhost
+  auth.mi-jn.de:
+    container_name: auth.mi-jn.de
     build:
       context: ./services/keycloak
       dockerfile: Dockerfile
     # restart: unless-stopped
+# Note: Using default keycloak user from base image
     healthcheck:
       test: ["CMD-SHELL", "/opt/keycloak/health-check.sh"]
       start_period: 10s                                                                                                                                  
@@ -243,7 +244,7 @@ services:
       redis:
         condition: service_healthy
       # keycloak:
-      keycloak.wecare.localhost:
+      auth.mi-jn.de:
         condition: service_healthy
     networks:                                                                                                                                            
       - hapi_fhir_network

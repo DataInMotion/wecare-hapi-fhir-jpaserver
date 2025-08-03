@@ -1,16 +1,29 @@
 server {
 
-  server_name hapi-fhir.wecare.localhost;
+  server_name fhir.mi-jn.de;
   listen 80;
-  include /etc/nginx/conf/ssl.conf;
 
-  return 301 https://$host$request_uri;
+  # Let's Encrypt ACME challenge location
+  location /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+  }
+
+  # Health check for certbot readiness
+  location /.well-known/acme-challenge/health-check {
+    return 200 "nginx ready for ACME challenge";
+    add_header Content-Type text/plain;
+  }
+
+  # Redirect all other HTTP traffic to HTTPS
+  location / {
+    return 301 https://$host$request_uri;
+  }
 
 }
 
 server {
 
-  server_name hapi-fhir.wecare.localhost;
+  server_name fhir.mi-jn.de;
   listen 443 ssl default_server;
   include /etc/nginx/conf/ssl.conf;
 
@@ -115,12 +128,29 @@ server {
 
 server {
 
-  server_name keycloak.wecare.localhost;
+  server_name auth.mi-jn.de;
+  listen 80;
+
+  # Let's Encrypt ACME challenge location
+  location /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+  }
+
+  # Redirect all other HTTP traffic to HTTPS
+  location / {
+    return 301 https://$host$request_uri;
+  }
+
+}
+
+server {
+
+  server_name auth.mi-jn.de;
   listen 443 ssl;
   include /etc/nginx/conf/ssl.conf;
 
   location /keycloak/ {
-    proxy_pass        https://keycloak.wecare.localhost:8443/;
+    proxy_pass        https://auth.mi-jn.de:8443/;
     proxy_set_header  Host               $host;
     proxy_set_header  X-Real-IP          $remote_addr;
     proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
@@ -131,7 +161,7 @@ server {
   }
 
   location /keycloak/auth/ {
-    proxy_pass        https://keycloak.wecare.localhost:8443/keycloak/auth/;
+    proxy_pass        https://auth.mi-jn.de:8443/keycloak/auth/;
     proxy_set_header  Host               $host;
     proxy_set_header  X-Real-IP          $remote_addr;
     proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;
@@ -142,7 +172,7 @@ server {
   }
 
   location / {
-    proxy_pass        https://keycloak.wecare.localhost:8443/;
+    proxy_pass        https://auth.mi-jn.de:8443/;
     proxy_set_header  Host               $host;
     proxy_set_header  X-Real-IP          $remote_addr;
     proxy_set_header  X-Forwarded-For    $proxy_add_x_forwarded_for;

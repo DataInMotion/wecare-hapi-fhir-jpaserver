@@ -1,0 +1,47 @@
+services:
+  certbot:
+    container_name: certbot
+    build:
+      context: ./services/certbot
+      dockerfile: Dockerfile
+    environment:
+      DOMAIN: ${DOMAIN:-fhir.mi-jn.de}
+      KEYCLOAK_DOMAIN: ${KEYCLOAK_HOSTNAME:-auth.mi-jn.de}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    volumes:
+      # Let's Encrypt certificates and configuration
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_lib:/var/lib/letsencrypt
+      # Webroot for ACME challenges
+      - certbot_webroot:/var/www/certbot
+      # Certificate output directory (shared with nginx and keycloak)
+      - '${PWD}/certs:/etc/nginx/certs'
+      # Trigger directory for host communication (no Docker socket!)
+      - ${LETSENCRYPT_TRIGGER_DIR:-/var/lib/certbot}:/var/lib/certbot
+    depends_on:
+      - nginx
+    networks:
+      - hapi_fhir_network
+    restart: unless-stopped
+    # Fix for setpgid permission errors
+    init: true
+    security_opt:
+      - no-new-privileges:true
+
+  nginx:
+    # Extends the nginx service from docker-compose.yml
+    # Note: volumes array is replaced entirely, so we must include all volumes
+    volumes:
+      - '${PWD}/services/nginx/conf/ssl.conf:/etc/nginx/conf/ssl.conf'
+      - '${PWD}/services/nginx/conf/nginx-default.conf.template:/etc/nginx/templates/default.conf.template'
+      - '${PWD}/certs:/etc/nginx/certs'
+      # Additional volume for Let's Encrypt ACME challenges
+      - certbot_webroot:/var/www/certbot:ro
+
+volumes:
+  letsencrypt_certs:
+    driver: local
+  letsencrypt_lib:
+    driver: local
+  certbot_webroot:
+    driver: local
