@@ -10,6 +10,11 @@ hapi:
     default_encoding: json
     # dao_config.server_id_mode: UUID
     custom_content_path: /custom
+    # Enable component scanning for custom packages
+    custom-bean-packages: org.gecko.fhir.jpa.starter
+    # Register custom audit logging interceptor
+    custom-interceptor-classes:
+      - org.gecko.fhir.jpa.starter.interceptor.AuditLoggingInterceptor
     tester:
       home:
         server_address: http://fhir.mi-jn.de/fhir

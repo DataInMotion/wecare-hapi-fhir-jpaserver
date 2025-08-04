@@ -2,6 +2,34 @@
 <configuration scan="true" scanPeriod="30 seconds">
 	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 	<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+	
+	<!-- Audit Log Appender -->
+	<appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/var/log/hapi-fhir/audit.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/var/log/hapi-fhir/audit.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+			<maxFileSize>100MB</maxFileSize>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>3GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Console Appender for Audit (optional, for development) -->
+	<appender name="AUDIT_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>[AUDIT] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- Audit Logger Configuration -->
+	<logger name="audit" level="INFO" additivity="false">
+		<appender-ref ref="AUDIT_FILE" />
+		<appender-ref ref="AUDIT_CONSOLE" />
+	</logger>
+	
 	<root level="INFO">
 		<appender-ref ref="CONSOLE" />
 	</root>
