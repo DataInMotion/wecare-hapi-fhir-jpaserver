@@ -65,12 +65,12 @@ This script will:
 
 Choose one of these options for production monitoring:
 
-**Option A: Systemd Service (Recommended)**
+**Set up certificate monitoring as cronjob:**
 ```bash
-sudo ./scripts/install-systemd-service.sh
+./scripts/setup-letsencrypt-cron.sh
 ```
 
-**Option B: Manual Process (Testing)**
+**Manual testing:**
 ```bash
 ./scripts/letsencrypt-monitor.sh
 ```
@@ -126,17 +126,19 @@ docker compose -f docker-compose.letsencrypt.yml exec certbot certbot renew --dr
 docker compose -f docker-compose.letsencrypt.yml exec certbot certbot renew --force-renewal
 ```
 
-### Service Management
+### Cronjob Management
 ```bash
-# Check monitor service status
-systemctl status letsencrypt-monitor
+# Check cronjob status
+crontab -l | grep letsencrypt-monitor
 
-# Stop/start monitor service
-sudo systemctl stop letsencrypt-monitor
-sudo systemctl start letsencrypt-monitor
+# View logs
+tail -f /var/log/letsencrypt-monitor.log
 
-# Disable auto-start
-sudo systemctl disable letsencrypt-monitor
+# Remove cronjob
+crontab -l | grep -v 'letsencrypt-monitor.sh' | crontab -
+
+# Manual run
+./scripts/letsencrypt-monitor.sh
 ```
 
 ## Security Features
@@ -174,11 +176,14 @@ curl http://your-domain.com/.well-known/acme-challenge/health-check
 
 **Services not reloading:**
 ```bash
-# Check monitor service
-systemctl status letsencrypt-monitor
+# Check cronjob logs
+tail -f /var/log/letsencrypt-monitor.log
 
 # Check trigger files
 ls -la /var/lib/certbot/
+
+# Run monitor manually
+./scripts/letsencrypt-monitor.sh
 ```
 
 ### Rate Limits

@@ -1,0 +1,7 @@
+username,email,first_name,last_name,password
+doctor1,doctor1@hospital.com,Dr. Sarah,Johnson,DoctorPass123!
+nurse1,nurse1@hospital.com,Mike,Wilson,NursePass123!
+researcher1,researcher1@university.edu,Dr. Emily,Chen,ResearchPass123!
+admin1,admin1@hospital.com,System,Administrator,AdminPass123!
+analyst1,analyst1@hospital.com,Data,Analyst,
+apiuser1,api@service.com,API,Service,ServicePass123!

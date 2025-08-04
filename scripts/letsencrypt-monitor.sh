@@ -52,30 +52,38 @@ restart_keycloak() {
     fi
 }
 
-# Main monitoring loop
-while true; do
-    # Check for nginx reload trigger
-    if [ -f "$TRIGGER_DIR/reload-nginx" ]; then
-        log "Found nginx reload trigger"
-        if reload_nginx; then
-            rm -f "$TRIGGER_DIR/reload-nginx"
-            log "Nginx reload trigger processed"
-        else
-            log "Nginx reload failed, keeping trigger file"
-        fi
+# Single check run (for cronjob execution)
+actions_performed=0
+
+# Check for nginx reload trigger
+if [ -f "$TRIGGER_DIR/reload-nginx" ]; then
+    log "Found nginx reload trigger"
+    if reload_nginx; then
+        rm -f "$TRIGGER_DIR/reload-nginx"
+        log "Nginx reload trigger processed"
+        actions_performed=$((actions_performed + 1))
+    else
+        log "Nginx reload failed, keeping trigger file for retry"
     fi
-    
-    # Check for keycloak restart trigger
-    if [ -f "$TRIGGER_DIR/restart-keycloak" ]; then
-        log "Found keycloak restart trigger"
-        if restart_keycloak; then
-            rm -f "$TRIGGER_DIR/restart-keycloak"
-            log "Keycloak restart trigger processed"
-        else
-            log "Keycloak restart failed, keeping trigger file"
-        fi
+fi
+
+# Check for keycloak restart trigger
+if [ -f "$TRIGGER_DIR/restart-keycloak" ]; then
+    log "Found keycloak restart trigger"
+    if restart_keycloak; then
+        rm -f "$TRIGGER_DIR/restart-keycloak"
+        log "Keycloak restart trigger processed"
+        actions_performed=$((actions_performed + 1))
+    else
+        log "Keycloak restart failed, keeping trigger file for retry"
     fi
-    
-    # Sleep for 30 seconds before checking again
-    sleep 30
-done
+fi
+
+# Log completion
+if [ $actions_performed -eq 0 ]; then
+    log "No trigger files found, nothing to do"
+else
+    log "Completed $actions_performed action(s)"
+fi
+
+log "Certificate monitor run completed"
