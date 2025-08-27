@@ -30,6 +30,9 @@ cp .env.letsencrypt.example .env
 
 # Start the basic stack
 docker compose up -d
+
+# Start the Let's Encrypt stack
+docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up -d
 ```
 
 ### 2. Set Up SSL Certificates
@@ -132,7 +135,7 @@ docker compose stop
 docker compose -f docker-compose-keycloak-realm-import.yml up -d
 docker compose -f docker-compose-keycloak-realm-import.yml stop
 docker compose -f docker-compose-keycloak-realm-import.yml down
-docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up -d
 ```
 
 **Export realm changes:**
@@ -141,7 +144,7 @@ docker compose stop
 docker compose -f docker-compose-keycloak-realm-export.yml up -d
 docker compose -f docker-compose-keycloak-realm-export.yml stop
 docker compose -f docker-compose-keycloak-realm-export.yml down
-docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml up -d
 ```
 
 ## API Access
@@ -205,7 +208,6 @@ All management tasks are handled via scripts in the `scripts/` directory:
 
 ## Documentation
 
-- **[CLAUDE.md](CLAUDE.md)** - Developer guide and architecture overview
 - **[docs/developer/](docs/developer/)** - Detailed technical documentation
 - **[scripts/README.md](scripts/README.md)** - Complete script reference
 
@@ -233,6 +235,5 @@ docker compose ps
 ## Support
 
 For detailed technical information, see:
-- [CLAUDE.md](CLAUDE.md) - Complete development guide
 - [docs/developer/](docs/developer/) - Technical documentation
 - [scripts/README.md](scripts/README.md) - Script reference
